@@ -6,16 +6,16 @@
         <img src="../assets/logo.png" alt="" />
       </div>
       <!-- 登录表单区 -->
-      <el-form :model="loginForm" class="login_form">
+      <el-form ref="loginFormRef" :model="loginForm" :rules="loginFormRules" class="login_form">
         <!-- 用户名 -->
-        <el-form-item>
+        <el-form-item prop="username">
           <el-input
-            v-model="loginForm.useername"
+            v-model="loginForm.username"
             prefix-icon="el-icon-s-custom"
           ></el-input>
         </el-form-item>
         <!-- 密码 -->
-        <el-form-item>
+        <el-form-item prop="password">
           <el-input
             v-model="loginForm.password"
             type="password"
@@ -25,7 +25,7 @@
         <!-- 按钮 -->
         <el-form-item class="btns">
           <el-button type="primary">登录</el-button>
-          <el-button type="info">重置</el-button>
+          <el-button type="info" @click="resetLoginForm">重置</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -36,10 +36,27 @@
 export default {
   data () {
     return {
+      // 登录表单的数据绑定对象
       loginForm: {
-        useername: '',
-        password: ''
+        username: '1111',
+        password: '111111'
+      },
+      // 表单的验证规则对象
+      loginFormRules: {
+        username: [
+          { required: true, message: '请输入用户名', trigger: 'blur' },
+          { min: 3, max: 10, message: '长度在 3 到 10 个字符', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { min: 6, max: 15, message: '长度在 6 到 15 个字符', trigger: 'blur' }
+        ]
       }
+    }
+  },
+  methods: {
+    resetLoginForm () {
+      this.$refs.loginFormRef.resetFields()
     }
   }
 }
