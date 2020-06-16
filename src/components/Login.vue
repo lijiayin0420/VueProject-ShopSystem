@@ -6,7 +6,12 @@
         <img src="../assets/logo.png" alt="" />
       </div>
       <!-- 登录表单区 -->
-      <el-form ref="loginFormRef" :model="loginForm" :rules="loginFormRules" class="login_form">
+      <el-form
+        ref="loginFormRef"
+        :model="loginForm"
+        :rules="loginFormRules"
+        class="login_form"
+      >
         <!-- 用户名 -->
         <el-form-item prop="username">
           <el-input
@@ -34,7 +39,7 @@
 
 <script>
 export default {
-  data () {
+  data() {
     return {
       // 登录表单的数据绑定对象
       loginForm: {
@@ -55,11 +60,11 @@ export default {
     }
   },
   methods: {
-    resetLoginForm () {
+    resetLoginForm() {
       this.$refs.loginFormRef.resetFields()
     },
-    login () {
-      this.$refs.loginFormRef.validate(async (valid) => {
+    login() {
+      this.$refs.loginFormRef.validate(async valid => {
         if (!valid) return
         const { data: res } = await this.$http.post('login', this.loginForm)
         if (res.meta.status !== 200) return this.$message.error('登录失败！')
