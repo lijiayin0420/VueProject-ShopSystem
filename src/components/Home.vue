@@ -16,21 +16,29 @@
         <el-menu
           background-color="#333744"
           text-color="#fff"
-          active-text-color="#ffd04b"
+          active-text-color="#409EFF"
         >
           <!-- 一级菜单 -->
-          <el-submenu index="1">
+          <el-submenu
+            :index="item.id + ''"
+            v-for="item in menuList"
+            :key="item.id"
+          >
             <!-- 一级菜单模版区 -->
             <template slot="title">
-              <i class="el-icon-location"></i>
-              <span>导航一</span>
+              <i :class="iconsObj[item.id]"></i>
+              <span>{{ item.authName }}</span>
             </template>
 
             <!-- 二级菜单 -->
-            <el-menu-item index="1-4-1">
+            <el-menu-item
+              :index="subItem.id + ''"
+              v-for="subItem in item.children"
+              :key="subItem.id"
+            >
               <template slot="title">
-                <i class="el-icon-location"></i>
-                <span>导航一</span>
+                <i class="el-icon-menu"></i>
+                <span>{{ subItem.authName }}</span>
               </template>
             </el-menu-item>
           </el-submenu>
@@ -44,10 +52,32 @@
 
 <script>
 export default {
+  data() {
+    return {
+      // 左侧菜单数据
+      menuList: [],
+      iconsObj: {
+        125: 'el-icon-user-solid',
+        103: 'el-icon-s-home',
+        101: 'el-icon-shopping-bag-1',
+        102: 'el-icon-s-order',
+        145: 'el-icon-s-data'
+      }
+    }
+  },
+  created() {
+    this.getMenuList()
+  },
   methods: {
     loginout() {
       window.sessionStorage.clear()
       this.$router.push('/login')
+    },
+    // 获取所有菜单
+    async getMenuList() {
+      const { data: res } = await this.$http.get('menus')
+      if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
+      this.menuList = res.data
     }
   }
 }
@@ -81,5 +111,8 @@ export default {
 }
 .el-main {
   background-color: #eaedf1;
+}
+.iconfont {
+  margin-right: 10px;
 }
 </style>
