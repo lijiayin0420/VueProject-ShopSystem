@@ -11,12 +11,16 @@
     <!-- 页面主体区域 -->
     <el-container>
       <!-- 侧边栏 -->
-      <el-aside width="200px">
+      <el-aside :width="isCollapse ? '64px' : '200px'">
+        <div class="toggle-button" @click="toggleCollapse">|||</div>
         <!-- 侧边栏菜单区域 -->
         <el-menu
           background-color="#333744"
           text-color="#fff"
           active-text-color="#409EFF"
+          unique-opened
+          :collapse="isCollapse"
+          :collapse-transition="false"
         >
           <!-- 一级菜单 -->
           <el-submenu
@@ -62,7 +66,8 @@ export default {
         101: 'el-icon-shopping-bag-1',
         102: 'el-icon-s-order',
         145: 'el-icon-s-data'
-      }
+      },
+      isCollapse: false
     }
   },
   created() {
@@ -78,6 +83,10 @@ export default {
       const { data: res } = await this.$http.get('menus')
       if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
       this.menuList = res.data
+    },
+    // 点击按钮，切换菜单的折叠与展开
+    toggleCollapse() {
+      this.isCollapse = !this.isCollapse
     }
   }
 }
@@ -87,6 +96,7 @@ export default {
 .home-container {
   height: 100%;
 }
+
 .el-header {
   background-color: #373d41;
   display: flex;
@@ -101,18 +111,36 @@ export default {
     align-items: center;
     margin-left: 15px;
   }
+
   img {
     width: 70px;
     height: 60px;
   }
 }
+
 .el-aside {
   background-color: #333744;
+
+  .el-menu {
+    border-right: none;
+  }
 }
+
 .el-main {
   background-color: #eaedf1;
 }
+
 .iconfont {
   margin-right: 10px;
+}
+
+.toggle-button {
+  background-color: #4A5064;
+  font-size: 10px;
+  line-height: 24px;
+  color: #fff;
+  text-align: center;
+  letter-spacing: 0.2em;
+  cursor: pointer;
 }
 </style>
