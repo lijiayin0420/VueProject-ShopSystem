@@ -22,6 +22,7 @@
           :collapse="isCollapse"
           :collapse-transition="false"
           router
+          :default-active="activePath"
         >
           <!-- 一级菜单 -->
           <el-submenu
@@ -40,6 +41,7 @@
               :index="'/' + subItem.path"
               v-for="subItem in item.children"
               :key="subItem.id"
+              @click="saveNavState('/' + subItem.path)"
             >
               <template slot="title">
                 <i class="el-icon-menu"></i>
@@ -71,11 +73,13 @@ export default {
         102: 'el-icon-s-order',
         145: 'el-icon-s-data'
       },
-      isCollapse: false
+      isCollapse: false,
+      activePath: ''
     }
   },
   created() {
     this.getMenuList()
+    this.activePath = window.sessionStorage.getItem('activePath')
   },
   methods: {
     loginout() {
@@ -91,6 +95,11 @@ export default {
     // 点击按钮，切换菜单的折叠与展开
     toggleCollapse() {
       this.isCollapse = !this.isCollapse
+    },
+    // 保存链接激活状态
+    saveNavState(activePath) {
+      window.sessionStorage.setItem('activePath', activePath)
+      this.activePath = activePath
     }
   }
 }
@@ -139,7 +148,7 @@ export default {
 }
 
 .toggle-button {
-  background-color: #4A5064;
+  background-color: #4a5064;
   font-size: 10px;
   line-height: 24px;
   color: #fff;
