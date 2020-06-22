@@ -54,6 +54,7 @@
                   v-for="(item, i) in scope.row.attr_vals"
                   :key="i"
                   closable
+                  @close="handleClose(i, scope.row)"
                   >{{ item }}</el-tag
                 >
                 <!-- 输入的文本框 -->
@@ -414,6 +415,25 @@ export default {
       row.inputValue = ''
       row.inputVisible = false
       // 发起请求，保存操作
+      this.saveAttrVals(row)
+    },
+    // 点击按钮，展示文本输入框
+    showInput(row) {
+      row.inputVisible = true
+      // 让文本框自动获得焦点
+      // $nextTick : 当页面上的元素被重新渲染之后才会回调函数中的代码
+      this.$nextTick(_ => {
+        this.$refs.saveTagInput.$refs.input.focus()
+      })
+    },
+    // 删除对应的参数可选项
+    handleClose(i, row) {
+      row.attr_vals.splice(i, 1)
+      this.saveAttrVals(row)
+    },
+    // 将对 attr_vals 的操作，保存到数据库
+    async saveAttrVals(row) {
+      // 发起请求，保存操作
       const { data: res } = await this.$http.put(
         `categories/${this.cateId}/attributes/${row.attr_id}`,
         {
@@ -428,15 +448,6 @@ export default {
       }
 
       this.$message.success('修改参数项成功')
-    },
-    // 点击按钮，展示文本输入框
-    showInput(row) {
-      row.inputVisible = true
-      // 让文本框自动获得焦点
-      // $nextTick : 当页面上的元素被重新渲染之后才会回调函数中的代码
-      this.$nextTick(_ => {
-        this.$refs.saveTagInput.$refs.input.focus()
-      })
     }
   },
   computed: {
