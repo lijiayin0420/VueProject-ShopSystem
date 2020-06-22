@@ -62,7 +62,11 @@
                   @click="showEditDialog(scope.row.attr_id)"
                   >编辑</el-button
                 >
-                <el-button type="danger" icon="el-icon-delete" size="mini"
+                <el-button
+                  type="danger"
+                  icon="el-icon-delete"
+                  size="mini"
+                  @click="removeParams(scope.row.attr_id)"
                   >删除</el-button
                 >
               </template>
@@ -97,7 +101,11 @@
                   @click="showEditDialog(scope.row.attr_id)"
                   >编辑</el-button
                 >
-                <el-button type="danger" icon="el-icon-delete" size="mini"
+                <el-button
+                  type="danger"
+                  icon="el-icon-delete"
+                  size="mini"
+                  @click="removeParams(scope.row.attr_id)"
                   >删除</el-button
                 >
               </template>
@@ -327,6 +335,34 @@ export default {
         this.getParamsData()
         this.editDialogVisible = false
       })
+    },
+    // 根据 id 删除数据
+    async removeParams(id) {
+      const confirmResult = await this.$confirm(
+        '此操作将永久删除该数据，是否继续？',
+        '提示',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      ).catch(err => err)
+
+      // 取消操作
+      if (confirmResult !== 'confirm') {
+        return this.$message.info('已取消删除！')
+      }
+
+      const { data: res } = await this.$http.delete(
+        `categories/${this.cateId}/attributes/${id}`
+      )
+
+      if (res.meta.status !== 200) {
+        return this.$message.error('删除失败')
+      }
+
+      this.$message.success('删除成功')
+      this.getParamsData()
     }
   },
   computed: {
