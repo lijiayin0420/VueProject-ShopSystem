@@ -98,11 +98,33 @@
               <el-input v-model="item.attr_vals"></el-input>
             </el-form-item>
           </el-tab-pane>
-          <el-tab-pane label="商品图片" name="3">商品图片</el-tab-pane>
+          <el-tab-pane label="商品图片" name="3">
+            <!-- action 表示图片要上传到的后台API地址 -->
+            <el-upload
+              :action="uploadURL"
+              :on-preview="handlePreview"
+              :on-remove="handleRemove"
+              list-type="picture"
+              :headers="headerObj"
+              :on-success="handleSuccess"
+            >
+              <el-button size="small" type="primary">点击上传</el-button>
+            </el-upload>
+          </el-tab-pane>
           <el-tab-pane label="商品内容" name="4">商品内容</el-tab-pane>
         </el-tabs>
       </el-form>
     </el-card>
+
+    <!-- 图片预览 -->
+    <el-dialog
+      title="图片预览"
+      :visible.sync="previewVisible"
+      width="50%"
+      :before-close="handleClose"
+    >
+      <img :src="previewPath" alt="" class="previewImg" />
+    </el-dialog>
   </div>
 </template>
 
@@ -118,7 +140,8 @@ export default {
         goods_weight: 0,
         goods_number: 0,
         // 商品所属的分类数组
-        goods_cat: []
+        goods_cat: [],
+        pics: ''
       },
       // 添加商品的表单的验证规则
       addFormRules: {
@@ -167,7 +190,14 @@ export default {
       // 动态参数列表数据
       manyTableData: [],
       // 静态属性列表数据
-      onlyTableData: []
+      onlyTableData: [],
+      uploadURL: 'http://timemeetyou.com:8889/api/private/v1/upload',
+      // 图片上传组件的请求头
+      headerObj: {
+        Authorization: window.sessionStorage.getItem('token')
+      },
+      previewPath: '',
+      previewVisible: false
     }
   },
   created() {
@@ -233,6 +263,27 @@ export default {
 
         this.onlyTableData = res.data
       }
+    },
+    // 处理图片预览效果
+    handlePreview(file) {
+      this.previewPath = file.response.data.url
+      this.previewVisible = true
+    },
+    // 处理移除图片的操作
+    handleRemove(file) {
+      // 1.获取将要移除的图片的临时路径
+      const filePath = file.response.data.tmp_path
+      // 2.从 pics 数组中，找到这个图片对应的索引值
+      const i = this.addForm.pics.findIndex(x => x.pic === filePath)
+      // 3.调用数组的 splice 方法，把图片信息对象，从 pics 数组中移除
+      this.addForm.pics.splice(i, 1)
+    },
+    // 监听图片上传成功的事件
+    handleSuccess(response) {
+      // 1.拼接得到一个图片信息对象
+      const picInfo = { pics: response.data.tmp_path }
+      // 2.将图片信息对象 push 到pics中
+      this.addForm.pics.push(picInfo)
     }
   },
   computed: {
@@ -250,5 +301,9 @@ export default {
 <style lang="less" scoped>
 .el-checkbox {
   margin: 0 5px 0 0 !important;
+}
+
+.previewImg {
+  width: 100%;
 }
 </style>
