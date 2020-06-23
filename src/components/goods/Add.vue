@@ -42,7 +42,11 @@
         label-width="100px"
         label-position="top"
       >
-        <el-tabs :tab-position="'left'" v-model="activeIndex">
+        <el-tabs
+          :tab-position="'left'"
+          v-model="activeIndex"
+          :before-leave="beforeTabLeave"
+        >
           <el-tab-pane label="基本信息" name="0">
             <el-form-item label="商品名称" prop="goods_name">
               <el-input v-model="addForm.goods_name"></el-input>
@@ -154,6 +158,12 @@ export default {
     handleChange() {
       if (this.addForm.goods_cat.length !== 3) {
         this.addForm.goods_cat = []
+      }
+    },
+    beforeTabLeave(activeName, oldActiveName) {
+      if (oldActiveName === 0 && this.addForm.goods_cat.length !== 3) {
+        this.$message.error('请先选择商品分类')
+        return false
       }
     }
   }
