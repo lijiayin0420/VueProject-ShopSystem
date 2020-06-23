@@ -115,25 +115,24 @@
             <!-- 富文本编辑器组件 -->
             <quill-editor v-model="addForm.goods_introduce"></quill-editor>
             <!-- 添加商品的按钮 -->
-            <el-button type="primary" class="btnAdd"></el-button>
+            <el-button type="primary" class="btnAdd" @click="add"
+              >添加商品</el-button
+            >
           </el-tab-pane>
         </el-tabs>
       </el-form>
     </el-card>
 
     <!-- 图片预览 -->
-    <el-dialog
-      title="图片预览"
-      :visible.sync="previewVisible"
-      width="50%"
-      :before-close="handleClose"
-    >
+    <el-dialog title="图片预览" :visible.sync="previewVisible" width="50%">
       <img :src="previewPath" alt="" class="previewImg" />
     </el-dialog>
   </div>
 </template>
 
 <script>
+import _ from 'lodash'
+
 export default {
   data() {
     return {
@@ -149,7 +148,8 @@ export default {
         // 图片的数组
         pics: '',
         // 商品的详情描述
-        goods_introduce: ''
+        goods_introduce: '',
+        attrs: []
       },
       // 添加商品的表单的验证规则
       addFormRules: {
@@ -292,6 +292,46 @@ export default {
       const picInfo = { pics: response.data.tmp_path }
       // 2.将图片信息对象 push 到pics中
       this.addForm.pics.push(picInfo)
+    },
+    // 添加商品
+    add() {
+      this.$refs.addFormRef.validate(async valid => {
+        if (!valid) {
+          return this.$message.error('请填写必要的表单项')
+        }
+
+        // 执行添加的业务逻辑
+        // lodash cloneDeep(obj)  深拷贝
+        const form = _.cloneDeep(this.addForm)
+        form.goods_cat = form.goods_cat.join(',')
+        // 处理动态参数
+        this.manyTableData.forEach(item => {
+          const newInfo = {
+            attr_id: item.attr_id,
+            attr_value: item.attr_vals.join(' ')
+          }
+          this.addForm.attrs.push(newInfo)
+        })
+        // 处理静态属性
+        this.onlyTableData.forEach(item => {
+          const newInfo = {
+            attr_id: item.attr_id,
+            attr_value: item.attr_vals
+          }
+          this.addForm.attrs.push(newInfo)
+        })
+        form.attrs = this.addForm.attrs
+
+        // 发起请求，添加商品
+        const { data: res } = await this.$http.post('goods', form)
+
+        if (res.meta.status !== 201) {
+          return this.$message.error('添加商品失败')
+        }
+
+        this.$message.success('添加商品成功')
+        this.$router.push('/goods')
+      })
     }
   },
   computed: {
