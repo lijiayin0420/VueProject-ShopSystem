@@ -49,11 +49,15 @@
           </template>
         </el-table-column>
         <el-table-column label="操作" width="230px">
-          <template>
+          <template slot-scope="scope">
             <el-button type="primary" icon="el-icon-edit" size="mini"
               >编辑</el-button
             >
-            <el-button type="danger" icon="el-icon-delete" size="mini"
+            <el-button
+              type="danger"
+              icon="el-icon-delete"
+              size="mini"
+              @click="removeById(scope.row.goods_id)"
               >删除</el-button
             >
           </template>
@@ -114,6 +118,30 @@ export default {
     },
     handleCurrentChange(newPage) {
       this.queryInfo.pagenum = newPage
+      this.getGoodsList()
+    },
+    async removeById(id) {
+      const confirmResult = await this.$confirm(
+        '此操作将永久删除该数据，是否继续？',
+        '提示',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      ).catch(err => err)
+
+      if (confirmResult !== 'confirm') {
+        return this.$message.info('已取消删除')
+      }
+
+      const { data: res } = await this.$http.delete(`goods/${id}`)
+
+      if (res.meta.status !== 200) {
+        return this.$message.error('删除失败')
+      }
+
+      this.$message.success('删除成功')
       this.getGoodsList()
     }
   }
