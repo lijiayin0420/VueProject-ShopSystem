@@ -46,6 +46,7 @@
           :tab-position="'left'"
           v-model="activeIndex"
           :before-leave="beforeTabLeave"
+          @tab-click="tabClicked"
         >
           <el-tab-pane label="基本信息" name="0">
             <el-form-item label="商品名称" prop="goods_name">
@@ -137,7 +138,9 @@ export default {
         label: 'cat_name',
         value: 'cat_id',
         children: 'children'
-      }
+      },
+      // 动态参数列表数据
+      manyTableData: []
     }
   },
   created() {
@@ -161,10 +164,38 @@ export default {
       }
     },
     beforeTabLeave(activeName, oldActiveName) {
-      if (oldActiveName === 0 && this.addForm.goods_cat.length !== 3) {
+      if (oldActiveName === '0' && this.addForm.goods_cat.length !== 3) {
         this.$message.error('请先选择商品分类')
         return false
       }
+    },
+    async tabClicked() {
+      // 证明访问的是 动态参数 面板
+      if (this.activeIndex === '1') {
+        const { data: res } = await this.$http.get(
+          `categories/${this.cateId}/attributes`,
+          {
+            params: {
+              sel: 'many'
+            }
+          }
+        )
+
+        if (res.meta.status !== 200) {
+          return this.$message.error('获取动态参数列表失败')
+        }
+
+        this.manyTableData = res.data
+      }
+    }
+  },
+  computed: {
+    cateId() {
+      if (this.addForm.goods_cat.length === 3) {
+        return this.addForm.goods_cat[2]
+      }
+
+      return null
     }
   }
 }
