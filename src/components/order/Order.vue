@@ -42,11 +42,13 @@
               type="primary"
               icon="el-icon-edit"
               size="mini"
+              @click="showBox"
             ></el-button>
             <el-button
               type="success"
               icon="el-icon-location"
               size="mini"
+              @click="showProgressBox"
             ></el-button>
           </template>
         </el-table-column>
@@ -64,6 +66,42 @@
       >
       </el-pagination>
     </el-card>
+
+    <!-- 修改地址的对话框 -->
+    <el-dialog
+      title="修改地址"
+      :visible.sync="addressVisible"
+      width="50%"
+      @close="addressDialogClosed"
+    >
+      <el-form
+        :model="addressForm"
+        :rules="addressFormRules"
+        ref="addressFormRef"
+        label-width="100px"
+      >
+        <el-form-item label="省市区/县" prop="address1">
+          <el-cascader
+            :options="cityData"
+            v-model="addressForm.address1"
+          ></el-cascader>
+        </el-form-item>
+        <el-form-item label="详细地址" prop="address2">
+          <el-input v-model="addressForm.address2"></el-input>
+        </el-form-item>
+      </el-form>
+
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="addressVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addressVisible = false"
+          >确 定</el-button
+        >
+      </span>
+    </el-dialog>
+
+    <!-- 展示物流进度的对话框 -->
+    <el-dialog title="物流进度" :visible.sync="progressVisible" width="50%">
+    </el-dialog>
   </div>
 </template>
 
@@ -77,7 +115,87 @@ export default {
         pagesize: 10
       },
       total: 0,
-      orderlist: []
+      orderlist: [],
+      addressVisible: false,
+      addressForm: {
+        address1: [],
+        address2: ''
+      },
+      addressFormRules: {
+        address1: [
+          {
+            required: true,
+            message: '请选择省市区/县',
+            trigger: 'blur'
+          }
+        ],
+        address2: [
+          {
+            required: true,
+            message: '请选择详细地址',
+            trigger: 'blur'
+          }
+        ]
+      },
+      cityData: [
+        {
+          value: 1,
+          label: '东南',
+          children: [
+            {
+              value: 2,
+              label: '上海',
+              children: [
+                { value: 3, label: '普陀' },
+                { value: 4, label: '黄埔' },
+                { value: 5, label: '徐汇' }
+              ]
+            },
+            {
+              value: 7,
+              label: '江苏',
+              children: [
+                { value: 8, label: '南京' },
+                { value: 9, label: '苏州' },
+                { value: 10, label: '无锡' }
+              ]
+            },
+            {
+              value: 12,
+              label: '浙江',
+              children: [
+                { value: 13, label: '杭州' },
+                { value: 14, label: '宁波' },
+                { value: 15, label: '嘉兴' }
+              ]
+            }
+          ]
+        },
+        {
+          value: 17,
+          label: '西北',
+          children: [
+            {
+              value: 18,
+              label: '陕西',
+              children: [
+                { value: 19, label: '西安' },
+                { value: 20, label: '延安' }
+              ]
+            },
+            {
+              value: 21,
+              label: '新疆维吾尔族自治区',
+              children: [
+                { value: 22, label: '乌鲁木齐' },
+                { value: 23, label: '克拉玛依' }
+              ]
+            }
+          ]
+        }
+      ],
+      progressVisible: false,
+      progressInfo: []
     }
   },
   created() {
@@ -104,9 +222,31 @@ export default {
     handleCurrentChange(newPage) {
       this.queryInfo.pagenum = newPage
       this.getOrderList()
+    },
+    // 展示修改地址的对话框
+    showBox() {
+      this.addressVisible = true
+    },
+    addressDialogClosed() {
+      this.$refs.addressFormRef.resetFields()
+    },
+    async showProgressBox() {
+      const { data: res } = await this.$http.get('kuaidi/804909574412544580')
+
+      if (res.meta.status !== 200) {
+        return this.$message.error('获取物流进度失败')
+      }
+
+      this.progressInfo = res.data
+
+      this.progressVisible = true
     }
   }
 }
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+.el-cascader {
+  width: 100%;
+}
+</style>
